@@ -7,8 +7,8 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <Label x:Name="label" Content="Path to steam" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="SteamPathText" Height="23" Margin="92,12,48,0" TextWrapping="Wrap" Text="C:\Something" VerticalAlignment="Top" TextChanged="SteamPathText_TextChanged"/>
+        <Label x:Name="label" Content="Path to steam:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="82"/>
+        <TextBox x:Name="SteamPathText" Height="23" Margin="97,12,48,0" TextWrapping="Wrap" Text="C:\Something" VerticalAlignment="Top" TextChanged="SteamPathText_TextChanged"/>
         <Button x:Name="PickPath" Content="..." HorizontalAlignment="Right" Margin="0,12,10,0" VerticalAlignment="Top" Width="33" Height="23" Click="PickPath_Click"/>
 
     </Grid>
