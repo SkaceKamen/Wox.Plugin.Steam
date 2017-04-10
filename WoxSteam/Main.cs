@@ -33,7 +33,7 @@ namespace WoxSteam
 				    Title = game.Name,
 					SubTitle = "Steam game",
 					IcoPath = game.Icon,
-					Score = 6,
+					Score = 100,
 					Action = context =>
 					{
 						System.Diagnostics.Process.Start(Path.Combine(Steam.RootPath, "steam.exe"), "-applaunch " + game.Appid);
