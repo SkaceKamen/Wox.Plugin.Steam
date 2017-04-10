@@ -2,4 +2,4 @@
 Wox plugin for launching installed Steam games without shortcuts.
 
 ## Preview
-![](http://i.imgur.com/30DKeyH.png)
+![](http://i.imgur.com/uZh4qiS.png)
