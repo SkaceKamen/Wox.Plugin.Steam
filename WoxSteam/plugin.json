@@ -1,0 +1,12 @@
+{
+    "ID":"d44b2d14-4875-45fc-a582-5dc35a7329f5",
+    "ActionKeyword":"*",
+    "Name":"Steam games",
+    "Description":"Allows launching installed steam games",
+    "Author":"zipekjan",
+    "Version":"1.0",
+    "Language":"csharp",
+    "Website":"https://github.com/Wox-launche/Wox",
+    "IcoPath":"Images\\app.png",
+    "ExecuteFileName":"WoxSteam.dll"
+}
