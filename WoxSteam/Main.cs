@@ -31,7 +31,7 @@ namespace WoxSteam
 				.Select(game => new Result()
 			    {
 				    Title = game.Name,
-					SubTitle = "Steam game",
+					SubTitle = "Steam application",
 					IcoPath = game.Icon,
 					Score = 100,
 					Action = context =>
