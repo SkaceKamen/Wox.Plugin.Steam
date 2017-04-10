@@ -1,7 +1,7 @@
 {
     "ID":"D44B2D14487545FCA5825DC35A7329F5",
     "ActionKeyword":"*",
-    "Name":"Steam games",
+    "Name":"Steam",
     "Description":"Allows launching installed steam games",
     "Author":"zipekjan",
     "Version":"1.0.0",
