@@ -15,7 +15,7 @@ namespace WoxSteam.BinaryVdf
 
 		public Reader(string path)
 		{
-			reader = new BinaryReader(File.OpenRead(path));
+			reader = new BinaryReader(File.OpenRead(path), System.Text.Encoding.UTF8);
 
 			// Read some header fields
 			reader.ReadByte();
@@ -73,18 +73,18 @@ namespace WoxSteam.BinaryVdf
 
 		private string ReadString()
 		{
-			var result = "";
+            var result = new List<byte>();
 
-			// Read chars until null
-			while (reader.PeekChar() != 0x00)
-			{
-				result += reader.ReadChar();
-			}
+            while (reader.ReadByte() != 0x00)
+            {
+                reader.BaseStream.Position -= 1;
+                byte b = reader.ReadByte();
+                result.Add(b);
+            }
 
-			// Skip null
-			reader.ReadByte();
+            string yourText = System.Text.Encoding.UTF8.GetString(result.ToArray());
 
-			return result;
+            return yourText;
 		}
 
 
@@ -107,7 +107,18 @@ namespace WoxSteam.BinaryVdf
 
 		public BinaryVdfItem this[string index]
 		{
-			get { return Items[index]; }
+			get
+            {
+                if (Items.ContainsKey(index)) {
+                    return Items[index];
+
+                } else
+                {
+                    return new BinaryVdfItem();
+
+                }
+
+            }
 			set { Items[index] = value; }
 		}
 

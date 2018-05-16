@@ -153,7 +153,7 @@ namespace WoxSteam
 					AppInfo = JsonConvert.DeserializeObject<Dictionary<uint, BinaryVdfItem>>(File.ReadAllText(cache));
 				}
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
 				// Failed to load appinfo, but we can still display games, so deploy dummy appinfo
 				AppInfo = null;

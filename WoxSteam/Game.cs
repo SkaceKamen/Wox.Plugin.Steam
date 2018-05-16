@@ -54,7 +54,7 @@ namespace WoxSteam
 		private string LoadIcon()
 		{
 			if (Details == null) return null;
-
+            if (Details.GetString("clienticon") == null) return null;
 			var icon = Details.GetString("clienticon") + ".ico";
 			var cachePath = Path.Combine(resourcesPath, icon);
 
