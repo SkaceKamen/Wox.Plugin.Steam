@@ -19,16 +19,18 @@ namespace ConsoleApplication1
 
 			main.Init(null);
 			var results = main.Query(query);
-
+            main.Steam.Load();
 			Console.WriteLine("Libraries: " + main.Steam.Libraries.Count);
 			Console.WriteLine("Games: " + main.Steam.Games.Count);
 			Console.WriteLine("Results: ");
-			foreach (var result in results)
-			{
-				Console.WriteLine(result.Title);
-			}
 
-			Console.ReadKey();
+            foreach(var game in main.Steam.Games)
+            {
+                Console.WriteLine(game.Name);
+                Console.WriteLine(game.Icon);
+            }
+
+            Console.ReadKey();
 		}
 	}
 }
