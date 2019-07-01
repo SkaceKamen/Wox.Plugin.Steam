@@ -11,23 +11,26 @@ namespace NeXt.Vdf
         {
             Name = name;
         }
-        
+
         /// <summary>
         /// This values name
         /// </summary>
         public string Name { get; private set; }
 
-        private List<string> comments = new List<string>();
+        private List<string> _comments = new List<string>();
 
         /// <summary>
         /// This values type, determines how it can be casted
         /// </summary>
-        public VdfValueType Type { get; protected set; }
+        public abstract VdfValueType Type { get; }
 
         /// <summary>
         /// Comments that where in front of this VdfValue
         /// </summary>
-        public ICollection<string> Comments { get { return comments; } }
+        public ICollection<string> Comments
+        {
+            get { return _comments; }
+        }
 
         /// <summary>
         /// This values Parent, null for root 

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using Newtonsoft.Json;
 
 namespace WoxSteam
@@ -13,14 +8,14 @@ namespace WoxSteam
 	/// </summary>
 	public class Options
 	{
-		private readonly string filePath;
+		private readonly string _filePath;
 
 		[JsonProperty]
 		public string SteamPath { get; set; }
 
 		public Options(string path)
 		{
-			filePath = path;
+			_filePath = path;
 		}
 
 		/// <summary>
@@ -29,10 +24,10 @@ namespace WoxSteam
 		public void Load()
 		{
 			// Skip loading if nothing was saved
-			if (!File.Exists(filePath)) return;
+			if (!File.Exists(_filePath)) return;
 
 			// Load stored options
-			var loaded = JsonConvert.DeserializeObject<Options>(File.ReadAllText(filePath));
+			var loaded = JsonConvert.DeserializeObject<Options>(File.ReadAllText(_filePath));
 
 			// Save them here
 			SteamPath = loaded.SteamPath;
@@ -43,7 +38,7 @@ namespace WoxSteam
 		/// </summary>
 		public void Save()
 		{
-			File.WriteAllText(filePath, JsonConvert.SerializeObject(this));
+			File.WriteAllText(_filePath, JsonConvert.SerializeObject(this));
 		}
 	}
 }

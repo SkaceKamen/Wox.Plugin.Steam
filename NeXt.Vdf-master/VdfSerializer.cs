@@ -16,7 +16,7 @@ namespace NeXt.Vdf
         /// <param name="value">the VdfValue to serialize</param>
         public VdfSerializer(VdfValue value)
         {
-            root = value;
+            _root = value;
         }
 
         private const string Newline = "\r\n";
@@ -24,18 +24,18 @@ namespace NeXt.Vdf
         private const string CommentDelimiter = "//";
         private const string TableOpen = "{";
         private const string TableClose = "}";
-        private const string KVSeperator = "\t";
+        private const string KvSeperator = "\t";
         private string IndentString
         {
             get
             {
-                return "\t".Repeat(indentLevel);
+                return "\t".Repeat(_indentLevel);
             }
         }
 
 
-        private VdfValue root;
-        private int indentLevel = 0;
+        private VdfValue _root;
+        private int _indentLevel;
 
         private string EscapeString(string v)
         {
@@ -75,7 +75,7 @@ namespace NeXt.Vdf
             {
                 case VdfValueType.String:
                 {
-                    onStep(KVSeperator);
+                    onStep(KvSeperator);
                     WriteString(onStep, (current as VdfString).Content, true);
   
                     onStep(Newline);
@@ -83,7 +83,7 @@ namespace NeXt.Vdf
                 }
                 case VdfValueType.Integer:
                 {
-                    onStep(KVSeperator);
+                    onStep(KvSeperator);
                     WriteString(onStep, (current as VdfInteger).Content.ToString(CultureInfo.InvariantCulture), false);
 
                     onStep(Newline);
@@ -91,7 +91,7 @@ namespace NeXt.Vdf
                 }
                 case VdfValueType.Double:
                 {
-                    onStep(KVSeperator);
+                    onStep(KvSeperator);
                     WriteString(onStep, (current as VdfDouble).Content.ToString(CultureInfo.InvariantCulture), false);
                     onStep(Newline);
                     break;
@@ -103,12 +103,12 @@ namespace NeXt.Vdf
                     onStep(IndentString);
                     onStep(TableOpen);
                     onStep(Newline);
-                    indentLevel++;
+                    _indentLevel++;
                     foreach(var v in current as VdfTable)
                     {
                         RunSerialization(onStep, v);
                     }
-                    indentLevel--;
+                    _indentLevel--;
                     onStep(IndentString);
                     onStep(TableClose);
                     onStep(Newline);
@@ -123,8 +123,8 @@ namespace NeXt.Vdf
         /// <returns>a string representing the VdfValue</returns>
         public string Serialize()
         {
-            StringBuilder sb = new StringBuilder();
-            RunSerialization((s) => sb.Append(s), root);
+            var sb = new StringBuilder();
+            RunSerialization((s) => sb.Append(s), _root);
 
             return sb.ToString();
         }
@@ -145,9 +145,9 @@ namespace NeXt.Vdf
         /// <param name="encoding"></param>
         public void Serialize(string filePath, Encoding encoding)
         {
-            using(StreamWriter writer = new StreamWriter(filePath, false, encoding))       
+            using(var writer = new StreamWriter(filePath, false, encoding))       
             {
-                RunSerialization(writer.Write, root);
+                RunSerialization(writer.Write, _root);
                 writer.Flush();
             }            
         }

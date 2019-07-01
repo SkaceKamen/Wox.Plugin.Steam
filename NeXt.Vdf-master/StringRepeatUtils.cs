@@ -26,8 +26,8 @@ namespace NeXt.Vdf
             }
             else
             {
-                StringBuilder sb = new StringBuilder();
-                for(int x = 0; x < i ; x++)
+                var sb = new StringBuilder();
+                for(var x = 0; x < i ; x++)
                 {
                     sb.Append(self);
                 }

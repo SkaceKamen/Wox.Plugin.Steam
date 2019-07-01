@@ -39,7 +39,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CharacterType.cs" />
     <Compile Include="StringRepeatUtils.cs" />
+    <Compile Include="Token.cs" />
+    <Compile Include="TokenType.cs" />
+    <Compile Include="UnexpectedCharacterException.cs" />
+    <Compile Include="VdfDeserializationException.cs" />
     <Compile Include="VdfDeserializer.cs" />
     <Compile Include="VdfDouble.cs" />
     <Compile Include="VdfInteger.cs" />

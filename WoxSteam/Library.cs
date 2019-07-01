@@ -17,23 +17,23 @@ namespace WoxSteam
 		/// <summary>
 		/// Path to this library.
 		/// </summary>
-		private readonly string path;
+		private readonly string _path;
 		/// <summary>
 		/// Reference to parent steam helper.
 		/// </summary>
-		private readonly Steam steam;
+		private readonly Steam _steam;
 
 		/// <param name="parent">Builder of this library</param>
 		/// <param name="path">Path to library</param>
 		public Library(Steam parent, string path)
 		{
-			this.path = path;
-			steam = parent;
+			_path = path;
+			_steam = parent;
 		}
 
 		public override string ToString()
 		{
-			return "Library(" + path + ")";
+			return "Library(" + _path + ")";
 		}
 
 		/// <summary>
@@ -42,13 +42,13 @@ namespace WoxSteam
 		/// <returns>games installed in this library</returns>
 		public IEnumerable<Game> GetGames()
 		{
-			var dir = new DirectoryInfo(Path.Combine(path, "steamapps"));
+			var dir = new DirectoryInfo(Path.Combine(_path, "steamapps"));
 
 			foreach (var fileInfo in dir.GetFiles())
 			{
 				if (AppMetaRegex.IsMatch(fileInfo.Name))
 				{
-					yield return new Game(fileInfo.FullName, steam.CachePath);
+					yield return new Game(fileInfo.FullName, _steam.CachePath);
 				}
 			}
 		}

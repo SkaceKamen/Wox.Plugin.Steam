@@ -54,6 +54,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppInfo.cs" />
+    <Compile Include="BinaryVdf\BinaryVdfItem.cs" />
     <Compile Include="BinaryVdf\Reader.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Game.cs" />

@@ -8,29 +8,6 @@ using System.IO;
 namespace NeXt.Vdf
 {
     /// <summary>
-    /// Base class for al Deserialization exceptions
-    /// </summary>
-    public class VdfDeserializationException : Exception
-    {
-        public VdfDeserializationException() : base() { }
-        public VdfDeserializationException(string message) : base() { }
-        public VdfDeserializationException(string message, Exception innerException) : base(message, innerException) { }
-    }
-
-    /// <summary>
-    /// A character was unexpected during deserialization
-    /// </summary>
-    public class UnexpectedCharacterException : VdfDeserializationException
-    {
-        public UnexpectedCharacterException(string message, char c) : base(message)
-        {
-            Character = c;
-        }
-
-        public char Character {get; private set;}
-    }
-
-    /// <summary>
     /// Deserializes Vdf formatted text into a VdfValue
     /// </summary>
     public class VdfDeserializer
@@ -39,9 +16,9 @@ namespace NeXt.Vdf
         /// Creates a VdfDeserializer object
         /// </summary>
         /// <param name="vdfText">the text to deserialize</param>
-        public VdfDeserializer(string vdfText)
+        private VdfDeserializer(string vdfText)
         {
-            VdfText = vdfText;
+            _vdfText = vdfText;
         }
 
         /// <summary>
@@ -54,40 +31,14 @@ namespace NeXt.Vdf
             using (var reader = new StreamReader(filePath))
             {
                 return new VdfDeserializer(reader.ReadToEnd());
-            }            
+            }
         }
 
-        private string VdfText;
+        private readonly string _vdfText;
 
-        private enum TokenType
-        {
-            String,
-            TableStart,
-            TableEnd,
-            Comment,
-            None,
-        }
-
-        private struct Token
-        {
-            public TokenType type;
-            public string content;
-        }
-
-        private enum CharacterType
-        {
-            Whitespace,
-            Newline,
-            SequenceDelimiter,
-            CommentDelimiter,
-            TableOpen,
-            TableClose,
-            EscapeChar,
-            Char,
-        }
         private CharacterType GetCharType(char c)
         {
-            switch(c)
+            switch (c)
             {
                 case '\n': return CharacterType.Newline;
                 case '\r':
@@ -104,7 +55,7 @@ namespace NeXt.Vdf
                 case '"': return CharacterType.SequenceDelimiter;
                 default: return CharacterType.Char;
             }
-        }       
+        }
 
 
         /// <summary>
@@ -114,7 +65,7 @@ namespace NeXt.Vdf
         /// <returns></returns>
         private char GetUnescapedChar(char c)
         {
-            switch(c)
+            switch (c)
             {
                 case 'n': return '\n';
                 case 't': return '\t';
@@ -133,107 +84,117 @@ namespace NeXt.Vdf
         private string GetTextToDelimiter(string s, int startindex, out int endIndex, out bool fullStop)
         {
             fullStop = true;
-            bool openEscape = false;
-            bool EscapedSequence = GetCharType(s[startindex]) == CharacterType.SequenceDelimiter;
+            var openEscape = false;
+            var escapedSequence = GetCharType(s[startindex]) == CharacterType.SequenceDelimiter;
 
-            StringBuilder sb = new StringBuilder();
-            for(int i = startindex; i < s.Length; i++)
+            var sb = new StringBuilder();
+            for (var i = startindex; i < s.Length; i++)
             {
-                switch(GetCharType(s[i]))
+                var c = s[i];
+                switch (GetCharType(c))
                 {
                     case CharacterType.SequenceDelimiter:
                     {
-                        if(!openEscape && EscapedSequence && i > startindex)
+                        if (!openEscape && escapedSequence && i > startindex)
                         {
                             endIndex = i + 1;
                             return sb.ToString();
                         }
-                        else if(!EscapedSequence)
+
+                        if (!escapedSequence)
                         {
-                            throw new UnexpectedCharacterException("Non-Escape sequences cannot contain sequence delimiters", s[i]);
+                            throw new UnexpectedCharacterException("Non-Escape sequences cannot contain sequence delimiters", c);
                         }
-                        else if(openEscape)
+
+                        if (openEscape)
                         {
-                            sb.Append(GetUnescapedChar(s[i]));
+                            sb.Append(GetUnescapedChar(c));
                             openEscape = false;
                         }
 
                         break;
                     }
+
                     case CharacterType.Whitespace:
                     {
-                        if(EscapedSequence)
+                        if (escapedSequence)
                         {
-                            sb.Append(s[i]);
+                            sb.Append(c);
                         }
                         else
                         {
                             endIndex = i;
                             return sb.ToString();
                         }
+
                         break;
                     }
+
                     case CharacterType.EscapeChar:
                     {
-                        if(openEscape)
+                        if (openEscape)
                         {
-                            sb.Append(GetUnescapedChar(s[i]));
+                            sb.Append(GetUnescapedChar(c));
                         }
+
                         openEscape = !openEscape;
                         break;
                     }
+
                     default:
                     {
-                        if(openEscape)
+                        if (openEscape)
                         {
-                            sb.Append(GetUnescapedChar(s[i]));
+                            sb.Append(GetUnescapedChar(c));
                             openEscape = false;
                         }
                         else
                         {
-                            sb.Append(s[i]);
+                            sb.Append(c);
                         }
+
                         break;
                     }
                 }
             }
+
             endIndex = s.Length;
-            if(EscapedSequence)
+            if (escapedSequence)
             {
-                if((GetCharType(s[s.Length-1]) != CharacterType.SequenceDelimiter))
+                if (GetCharType(s[s.Length - 1]) != CharacterType.SequenceDelimiter)
                 {
                     fullStop = false;
                 }
                 else
                 {
-                    int c = 0;
-                    for (int i = s.Length - 2; i >= 0 && GetCharType(s[i]) == CharacterType.EscapeChar; i--)
+                    var c = 0;
+                    for (var i = s.Length - 2; i >= 0 && GetCharType(s[i]) == CharacterType.EscapeChar; i--)
                     {
                         c++;
                     }
 
-                    fullStop = (c % 2) == 0;
+                    fullStop = c % 2 == 0;
                 }
             }
+
             return sb.ToString();
         }
 
-        private Token startedToken;
-        private bool unclosedLine = false;
+        private Token _startedToken;
+        private bool _unclosedLine;
+
         private void HandleUnclosedLine(Action<Token> callback, string line)
         {
-            int endindex;
-            bool isEnd;
-            string text = GetTextToDelimiter("\""+line, 0, out endindex, out isEnd);
+            var text = GetTextToDelimiter("\"" + line, 0, out var endindex, out var isEnd);
             if (!isEnd)
             {
-                startedToken.content += text;
-                unclosedLine = true;
+                _startedToken.Content += text;
+                _unclosedLine = true;
             }
             else
             {
-                unclosedLine = false;
-                callback(startedToken);
+                _unclosedLine = false;
+                callback(_startedToken);
                 if (endindex < line.Length)
                 {
                     HandleLine(callback, line.Substring(endindex).Trim());
@@ -243,54 +204,60 @@ namespace NeXt.Vdf
 
         private void HandleLine(Action<Token> callback, string line)
         {
-            if(string.IsNullOrEmpty(line))
+            if (string.IsNullOrEmpty(line))
             {
                 return;
             }
-            CharacterType ct = GetCharType(line[0]);
-            switch(ct)
+
+            var ct = GetCharType(line[0]);
+            switch (ct)
             {
                 case CharacterType.TableOpen:
                 {
-                    callback(new Token(){type=TokenType.TableStart, content=line[0].ToString() });
+                    callback(new Token() {Type = TokenType.TableStart, Content = line[0].ToString()});
                     break;
                 }
+
                 case CharacterType.TableClose:
                 {
-                    callback(new Token(){type=TokenType.TableEnd, content=line[0].ToString() });
+                    callback(new Token() {Type = TokenType.TableEnd, Content = line[0].ToString()});
                     break;
                 }
+
                 case CharacterType.CommentDelimiter:
                 {
-                    if(line.Length < 2 || GetCharType(line[1]) != CharacterType.CommentDelimiter)
+                    if (line.Length < 2 || GetCharType(line[1]) != CharacterType.CommentDelimiter)
                     {
                         throw new UnexpectedCharacterException("Single comment delimiter is not allowed", line[0]);
                     }
-                    callback(new Token(){type=TokenType.Comment, content=line });         
+
+                    callback(new Token {Type = TokenType.Comment, Content = line});
                     break;
                 }
+
                 default:
                 {
-                    int endindex;
-                    bool isEnd;
-                    string text = GetTextToDelimiter(line, 0, out endindex, out isEnd);
-                    if(!isEnd)
+                    var text = GetTextToDelimiter(line, 0, out var endindex, out var isEnd);
+                    if (!isEnd)
                     {
-                        startedToken = new Token() { type = TokenType.String, content = text };
-                        unclosedLine = true;
+                        _startedToken = new Token() {Type = TokenType.String, Content = text};
+                        _unclosedLine = true;
                     }
                     else
                     {
-                        callback(new Token() { type = TokenType.String, content = text });
+                        callback(new Token
+                        {
+                            Type = TokenType.String, Content = text
+                        });
                         if (endindex < line.Length)
                         {
                             HandleLine(callback, line.Substring(endindex).Trim());
                         }
                     }
+
                     break;
                 }
             }
-
         }
 
         /// <summary>
@@ -304,9 +271,9 @@ namespace NeXt.Vdf
 
             var lines = s.Split('\n').Select((v) => v.Trim());
 
-            foreach(var line in lines)
+            foreach (var line in lines)
             {
-                if(unclosedLine)
+                if (_unclosedLine)
                 {
                     HandleUnclosedLine(result.Add, line);
                 }
@@ -314,7 +281,6 @@ namespace NeXt.Vdf
                 {
                     HandleLine(result.Add, line);
                 }
-
             }
 
             return result;
@@ -326,20 +292,21 @@ namespace NeXt.Vdf
         /// <returns></returns>
         public VdfValue Deserialize()
         {
-            if(VdfText== null)
+            if (_vdfText == null)
             {
-                throw new ArgumentNullException("s");
-            }
-            if(VdfText.Length < 1)
-            {
-                throw new ArgumentException("s cannot be empty ", "s");
+                throw new ArgumentNullException();
             }
 
-            var tokens = Tokenize(VdfText);
-
-            if(tokens.Count < 1)
+            if (_vdfText.Length < 1)
             {
-                throw new ArgumentException("no tokens found in string", "s");
+                throw new ArgumentException("s cannot be empty ");
+            }
+
+            var tokens = Tokenize(_vdfText);
+
+            if (tokens.Count < 1)
+            {
+                throw new ArgumentException("no tokens found in string");
             }
 
             VdfValue root = null;
@@ -348,37 +315,39 @@ namespace NeXt.Vdf
 
             string name = null;
 
-            foreach(var token in tokens)
+            foreach (var token in tokens)
             {
-                if(token.type == TokenType.Comment)
+                if (token.Type == TokenType.Comment)
                 {
-                    comments.Add(token.content.Substring(2));
+                    comments.Add(token.Content.Substring(2));
                     continue;
                 }
 
 
-                if(root == null)
+                if (root == null)
                 {
-                    if (token.type == TokenType.String)
+                    if (token.Type == TokenType.String)
                     {
-                        if(name != null)
+                        if (name != null)
                         {
-                            return new VdfString(name, token.content);
+                            return new VdfString(name, token.Content);
                         }
 
-                        name = token.content;
+                        name = token.Content;
                     }
-                    else if (token.type == TokenType.TableStart)
+                    else if (token.Type == TokenType.TableStart)
                     {
                         root = new VdfTable(name);
-                        if(comments.Count > 0)
+                        if (comments.Count > 0)
                         {
-                            foreach(var comment in comments)
+                            foreach (var comment in comments)
                             {
                                 root.Comments.Add(comment);
                             }
+
                             comments.Clear();
                         }
+
                         current = root as VdfTable;
                         name = null;
                     }
@@ -386,41 +355,42 @@ namespace NeXt.Vdf
                     {
                         throw new VdfDeserializationException("Invalid format: First token was not a string");
                     }
+
                     continue;
                 }
 
-                if(name != null)
+                if (name != null)
                 {
                     VdfValue v;
-                    if(token.type == TokenType.String)
+                    if (token.Type == TokenType.String)
                     {
-                        int i;
-                        double d;
-
-                        if(int.TryParse(token.content, NumberStyles.Integer, CultureInfo.InvariantCulture, out i))
+                        if (int.TryParse(token.Content, NumberStyles.Integer, CultureInfo.InvariantCulture, out var i))
                         {
                             v = new VdfInteger(name, i);
                         }
-                        else if(double.TryParse(token.content, NumberStyles.Number, CultureInfo.InvariantCulture, out d))
+                        else if (double.TryParse(token.Content, NumberStyles.Number, CultureInfo.InvariantCulture, out var d))
                         {
                             v = new VdfDouble(name, d);
                         }
                         else
                         {
-                            v = new VdfString(name, token.content);
+                            v = new VdfString(name, token.Content);
                         }
+
                         if (comments.Count > 0)
                         {
                             foreach (var comment in comments)
                             {
                                 v.Comments.Add(comment);
                             }
+
                             comments.Clear();
                         }
+
                         name = null;
                         current.Add(v);
                     }
-                    else if (token.type == TokenType.TableStart)
+                    else if (token.Type == TokenType.TableStart)
                     {
                         v = new VdfTable(name);
                         if (comments.Count > 0)
@@ -429,8 +399,10 @@ namespace NeXt.Vdf
                             {
                                 v.Comments.Add(comment);
                             }
+
                             comments.Clear();
                         }
+
                         current.Add(v);
                         name = null;
                         current = v as VdfTable;
@@ -438,11 +410,11 @@ namespace NeXt.Vdf
                 }
                 else
                 {
-                    if(token.type == TokenType.String)
+                    if (token.Type == TokenType.String)
                     {
-                        name = token.content;
+                        name = token.Content;
                     }
-                    else if(token.type == TokenType.TableEnd)
+                    else if (token.Type == TokenType.TableEnd)
                     {
                         current = current.Parent as VdfTable;
                     }
@@ -453,7 +425,7 @@ namespace NeXt.Vdf
                 }
             }
 
-            if(current != null)
+            if (current != null)
             {
                 throw new VdfDeserializationException("Invalid format: unclosed table");
             }

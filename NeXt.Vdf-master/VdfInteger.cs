@@ -5,16 +5,12 @@
     /// </summary>
     public sealed class VdfInteger : VdfValue
     {
-        public VdfInteger(string name) : base(name)
-        {
-            Type = VdfValueType.Integer;
-        }
-
-        public VdfInteger(string name, int value) : this(name)
+        public VdfInteger(string name, int value) : base(name)
         {
             Content = value;
         }
 
-        public int Content { get; set; }
+        public int Content { get; }
+        public override VdfValueType Type => VdfValueType.Integer;
     }
 }
