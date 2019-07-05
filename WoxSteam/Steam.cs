@@ -71,6 +71,8 @@ namespace WoxSteam
                     game.Details = item;
                 }
             }
+
+            appinfo.Clear();
         }
 
         /// <summary>
