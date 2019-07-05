@@ -112,33 +112,40 @@ namespace WoxSteam
         /// </summary>
         private Dictionary<uint, AppInfo> LoadAppinfo()
         {
-            // Basic appinfo file informations
-            var appinfoPath = Path.Combine(RootPath, "appcache", "appinfo.vdf");
-            var currentHash = Md5(appinfoPath);
-
-            // Appinfo is cached to speedup loading
-            var cache = Path.Combine(CachePath, "appinfo.json");
-            var cacheHashFile = Path.Combine(CachePath, "appinfo.vdf.md5");
-            string cacheHash = null;
-
-            // Hash is used to determine if appinfo recently changed
-            if (File.Exists(cacheHashFile))
+            try
             {
-                cacheHash = File.ReadAllText(cacheHashFile);
+                // Basic appinfo file informations
+                var appinfoPath = Path.Combine(RootPath, "appcache", "appinfo.vdf");
+                var currentHash = Md5(appinfoPath);
+
+                // Appinfo is cached to speedup loading
+                var cache = Path.Combine(CachePath, "appinfo.json");
+                var cacheHashFile = Path.Combine(CachePath, "appinfo.vdf.md5");
+                string cacheHash = null;
+
+                // Hash is used to determine if appinfo recently changed
+                if (File.Exists(cacheHashFile))
+                {
+                    cacheHash = File.ReadAllText(cacheHashFile);
+                }
+
+                if (!File.Exists(cache) || cacheHash != null && cacheHash != currentHash)
+                {
+                    var apps = Reader.Read(appinfoPath).ToDictionary(pair => pair.Key, pair => AppInfo.From(pair.Value));
+                    var text = JsonConvert.SerializeObject(apps);
+                    File.WriteAllText(cache, text);
+                    File.WriteAllText(cacheHashFile, currentHash);
+                    return apps;
+                }
+                else
+                {
+                    var text = File.ReadAllText(cache);
+                    return JsonConvert.DeserializeObject<Dictionary<uint, AppInfo>>(text);
+                }
             }
-
-            if (!File.Exists(cache) || cacheHash != null && cacheHash != currentHash)
+            catch
             {
-                var apps = Reader.Read(appinfoPath).ToDictionary(pair => pair.Key, pair => AppInfo.From(pair.Value));
-                var text = JsonConvert.SerializeObject(apps);
-                File.WriteAllText(cache, text);
-                File.WriteAllText(cacheHashFile, currentHash);
-                return apps;
-            }
-            else
-            {
-                var text = File.ReadAllText(cache);
-                return JsonConvert.DeserializeObject<Dictionary<uint, AppInfo>>(text);
+                return new Dictionary<uint, AppInfo>();
             }
         }
 
