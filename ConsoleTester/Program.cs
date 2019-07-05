@@ -1,6 +1,4 @@
 ﻿using System;
-using Wox.Plugin;
-using WoxSteam;
 
 namespace ConsoleApplication1
 {
@@ -8,8 +6,8 @@ namespace ConsoleApplication1
     {
         public static void Main()
         {
-            var main = new Main();
-            var query = new Query();
+            var main = new WoxSteam.Main();
+            var query = new Wox.Plugin.Query();
 
             query.GetType().GetProperty("RawQuery")?.SetValue(query, "Arm", null);
             query.GetType().GetProperty("Search")?.SetValue(query, "Search", null);
