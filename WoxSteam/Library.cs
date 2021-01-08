@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -44,11 +45,19 @@ namespace WoxSteam
 		{
 			var dir = new DirectoryInfo(Path.Combine(path, "steamapps"));
 
-			foreach (var fileInfo in dir.GetFiles())
+			foreach (FileInfo fileInfo in dir.GetFiles())
 			{
 				if (AppMetaRegex.IsMatch(fileInfo.Name))
 				{
-					yield return new Game(fileInfo.FullName, steam.CachePath);
+					Game game = null;
+					try
+					{
+						game = new Game(fileInfo.FullName, steam.CachePath);
+					}
+					catch (Exception) { } // There can be empty/corrupt library files. Ignore these.
+
+					if (game != null)
+						yield return game;
 				}
 			}
 		}
